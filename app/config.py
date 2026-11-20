@@ -6,6 +6,8 @@ class Settings(BaseSettings):
     jwt_secret_key: str = "CHANGE-ME-IN-PRODUCTION"
     jwt_algorithm: str = "HS256"
     access_token_expire_minutes: int = 60
-    model_config = SettingsConfigDict(env_file=".env", extra="ignore")
+    admin_initial_password: str
 
+    model_config = SettingsConfigDict(env_file=".env", extra="ignore")
+    
 settings = Settings()
