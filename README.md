@@ -126,7 +126,9 @@ Crie o arquivo `.env` utilizando o modelo disponibilizado:
 Copy-Item .env.example .env
 ```
 
-Configure as variáveis necessárias, incluindo uma chave JWT própria e segura.
+Configure as variáveis necessárias no arquivo `.env`, incluindo `ADMIN_INITIAL_PASSWORD` e uma chave JWT própria e segura.
+
+**Importante:** não publique o arquivo `.env` no GitHub, pois ele contém informações privadas.
 
 ### 5. Inicializar o banco de dados
 
@@ -134,14 +136,12 @@ Configure as variáveis necessárias, incluindo uma chave JWT própria e segura.
 python -m app.seed
 ```
 
-Esse comando prepara os dados iniciais e cria o administrador de demonstração.
-
-**Credenciais iniciais de demonstração:**
+**Acesso inicial do administrador:**
 
 - E-mail: `admin@nexuscorp.local`
-- Senha: `TroqueEstaSenha123!`
+- Senha: definida localmente pela variável `ADMIN_INITIAL_PASSWORD` no arquivo `.env`.
 
-Essas credenciais são destinadas exclusivamente à inicialização local. Não devem ser utilizadas em produção.
+Cada pessoa deverá configurar sua própria senha antes de inicializar o projeto. Não compartilhe nem publique o conteúdo do arquivo `.env`.
 
 ### 6. Executar a aplicação
 
