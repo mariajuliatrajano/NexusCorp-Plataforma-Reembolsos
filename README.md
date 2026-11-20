@@ -1,55 +1,204 @@
-# NexusCorp — Plataforma de Gestão de Reembolsos
+# NexusCorp — Plataforma de Gestão de Reembolsos Corporativos
 
-API REST em Python com FastAPI, SQLAlchemy e banco relacional. SQLite é o padrão para execução local; também é possível configurar uma URL de banco compatível com SQLAlchemy, como MySQL.
+API REST desenvolvida em Python com FastAPI para gerenciamento de solicitações de reembolso corporativo.
 
-## Requisitos
-- Python 3.11 ou superior
-- pip
+O projeto implementa autenticação, controle de acesso por perfil, validação de regras de negócio, fluxo de aprovação e histórico de operações, utilizando banco de dados relacional.
 
-## Instalação no Windows (PowerShell)
-```powershell
-py -m venv venv
-.env\Scripts\Activate.ps1
-pip install -r requirements.txt
-Copy-Item .env.example .env
-python -m app.seed
-uvicorn app.main:app --reload
+## Tecnologias utilizadas
+
+- Python
+- FastAPI
+- SQLAlchemy
+- SQLite
+- JWT (JSON Web Token)
+- PBKDF2-HMAC-SHA256
+- Pytest
+- Swagger UI
+
+## Funcionalidades
+
+- Autenticação de usuários com JWT.
+- Controle de acesso baseado em perfis.
+- Cadastro e consulta de solicitações de reembolso.
+- Edição e exclusão de solicitações somente enquanto estiverem em rascunho.
+- Fluxo de aprovação dividido em etapas.
+- Restrição de acesso conforme usuário e departamento.
+- Registro do histórico de decisões e responsáveis.
+- Validação das regras de negócio.
+- Proteção contra tentativas de acesso não autorizado.
+
+## Perfis de acesso
+
+| Perfil | Responsabilidades |
+|---|---|
+| COLABORADOR | Cadastrar, consultar e gerenciar seus próprios reembolsos enquanto estiverem em rascunho. |
+| GESTOR | Analisar solicitações dos colaboradores do próprio departamento. |
+| FINANCEIRO | Realizar a aprovação financeira e registrar pagamentos. |
+| ADMIN | Gerenciar departamentos e usuários. |
+
+## Fluxo de aprovação
+
+As solicitações seguem o seguinte fluxo:
+
+`RASCUNHO` → `AGUARDANDO_GESTOR` → `AGUARDANDO_FINANCEIRO` → `APROVADA` → `PAGA`
+
+Uma solicitação também pode receber o status `REJEITADA` quando recusada durante uma das etapas de análise.
+
+## Segurança e regras de negócio
+
+A aplicação implementa mecanismos para garantir a integridade das operações:
+
+- Autenticação por tokens JWT.
+- Armazenamento de senhas utilizando hash.
+- Verificação de permissões conforme o perfil do usuário.
+- Restrição de acesso às solicitações de outros colaboradores.
+- Validação do departamento responsável pela análise.
+- Impedimento de aprovação financeira fora da sequência estabelecida.
+- Bloqueio de alterações após o envio da solicitação.
+- Registro de histórico com responsável, etapa, decisão e data.
+- Validação de informações obrigatórias e referências de comprovantes.
+
+## Testes e homologação
+
+Foram realizados testes funcionais manuais utilizando o Swagger UI para verificar oito cenários:
+
+1. Bloqueio de acesso a solicitações de outros colaboradores.
+2. Impedimento de aprovação por gestores de outros departamentos.
+3. Rejeição de autenticação com senha incorreta.
+4. Bloqueio de tentativas de elevação de privilégios.
+5. Impedimento de aprovação financeira fora da sequência.
+6. Bloqueio de alterações após o envio da solicitação.
+7. Verificação do filtro de solicitações por departamento.
+8. Verificação da integridade e disponibilidade do histórico de análise.
+
+Também foi configurado um teste automatizado com Pytest para verificar se a aplicação pode ser importada corretamente.
+
+## Como executar o projeto
+
+### Requisitos
+
+- Python 3.11 ou superior.
+- pip.
+
+### 1. Clonar o repositório
+
+```bash
+git clone https://github.com/mariajuliatrajano/NexusCorp-Plataforma-Reembolsos.git
 ```
-Abra `http://127.0.0.1:8000/docs` para consultar e testar a documentação interativa.
 
-## Primeiro acesso
+Entre na pasta:
+
+```bash
+cd NexusCorp-Plataforma-Reembolsos
+```
+
+### 2. Criar o ambiente virtual
+
+```powershell
+python -m venv venv
+```
+
+Ative o ambiente no Windows:
+
+```powershell
+.\venv\Scripts\Activate.ps1
+```
+
+### 3. Instalar as dependências
+
+```bash
+pip install -r requirements.txt
+```
+
+### 4. Configurar as variáveis de ambiente
+
+Crie o arquivo `.env` utilizando o modelo disponibilizado:
+
+```powershell
+Copy-Item .env.example .env
+```
+
+Configure as variáveis necessárias, incluindo uma chave JWT própria e segura.
+
+### 5. Inicializar o banco de dados
+
+```bash
+python -m app.seed
+```
+
+Esse comando prepara os dados iniciais e cria o administrador de demonstração.
+
+**Credenciais iniciais de demonstração:**
+
 - E-mail: `admin@nexuscorp.local`
 - Senha: `TroqueEstaSenha123!`
 
-A senha é apenas para inicialização local. Troque-a e substitua `JWT_SECRET_KEY` antes de qualquer uso real. O projeto não possui endpoint de troca de senha nesta versão; a troca deve ser feita administrativamente no banco ou implementada antes de produção.
+Essas credenciais são destinadas exclusivamente à inicialização local. Não devem ser utilizadas em produção.
 
-## Configuração de banco
-Edite `DATABASE_URL` no `.env`. Exemplo SQLite:
-`sqlite:///./nexuscorp.db`
+### 6. Executar a aplicação
 
-Exemplo MySQL (instale também o driver `pymysql` e use `mysql+pymysql://usuario:senha@localhost/nexuscorp`):
-`mysql+pymysql://usuario:senha@localhost/nexuscorp`
-
-## Fluxo rápido
-1. Faça login em `/auth/login`.
-2. Clique em Authorize no Swagger e informe `Bearer SEU_TOKEN`.
-3. Admin cria departamentos em `/departments` e usuários em `/users`.
-4. Colaborador cria em `/reimbursements`, depois chama `/submit`.
-5. Gestor chama `/manager-decision` com observação iniciada por `APROVAR:` ou `RECUSAR:`.
-6. Financeiro chama `/finance-decision` e, se aprovar, `/payment`.
-7. Consulte `/history` para auditar as decisões.
-
-## Testes
-```powershell
-pytest -q
+```bash
+uvicorn app.main:app --reload
 ```
-O teste incluído verifica a presença dos oito cenários no roteiro de homologação. O documento `docs/HOMOLOGACAO.md` descreve os testes funcionais manuais e resultados esperados; execute-os na API para produzir evidências reais.
 
-## Estrutura
-- `app/`: API, modelos, schemas, autenticação e seed.
-- `docs/DOCUMENTACAO_TECNICA.md`: documentação solicitada.
-- `docs/HOMOLOGACAO.md`: roteiro dos oito cenários.
-- `tests/`: testes automatizados básicos.
+A API estará disponível em:
 
-## Limitações desta primeira versão
-Sem interface gráfica, upload de comprovantes ou pagamento bancário real, conforme o enunciado. O papel ADMIN é administrativo e não substitui os três perfis operacionais. A API usa histórico append-only na camada HTTP, mas um administrador do banco ainda pode alterar dados diretamente; em produção, restrinja credenciais do banco e considere auditoria imutável externa.
+`http://127.0.0.1:8000`
+
+### 7. Acessar a documentação interativa
+
+Acesse:
+
+`http://127.0.0.1:8000/docs`
+
+O Swagger UI permite visualizar os endpoints, realizar autenticações e executar requisições para testar as funcionalidades da API.
+
+Após realizar o login em `/auth/login`, copie o valor de `access_token` e informe-o no campo de autorização do Swagger.
+
+### 8. Executar o teste automatizado
+
+```bash
+python -m pytest -q
+```
+
+## Estrutura do projeto
+
+```text
+nexuscorp_reembolsos/
+│
+├── app/
+│   ├── __init__.py
+│   ├── config.py
+│   ├── database.py
+│   ├── main.py
+│   ├── models.py
+│   ├── schemas.py
+│   ├── security.py
+│   └── seed.py
+│
+├── tests/
+│   └── test_rules_outline.py
+│
+├── .env.example
+├── .gitignore
+├── README.md
+└── requirements.txt
+```
+
+## Limitações da versão atual
+
+- Não possui interface gráfica.
+- Não possui upload de comprovantes.
+- Não realiza integração bancária ou pagamentos reais.
+- O histórico é protegido contra alterações pelas rotas HTTP, mas não contra alterações diretas no banco de dados.
+- A troca de senha não possui endpoint implementado nesta versão.
+
+## Objetivo do projeto
+
+Este projeto foi desenvolvido como aplicação prática de desenvolvimento de APIs REST, autenticação, autorização, persistência de dados, regras de negócio e testes de software.
+
+A solução demonstra a implementação de um fluxo corporativo de reembolsos com diferentes níveis de responsabilidade e mecanismos de controle de acesso.
+
+---
+
+**NexusCorp | Plataforma de Gestão de Reembolsos Corporativos**
