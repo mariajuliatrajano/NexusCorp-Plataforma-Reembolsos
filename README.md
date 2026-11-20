@@ -4,6 +4,14 @@ API REST desenvolvida em Python com FastAPI para gerenciamento de solicitações
 
 O projeto implementa autenticação, controle de acesso por perfil, validação de regras de negócio, fluxo de aprovação e histórico de operações, utilizando banco de dados relacional.
 
+## 🎓 Objetivo do Projeto
+
+Este projeto foi desenvolvido como parte de uma atividade acadêmica da faculdade, com o objetivo de aplicar, na prática, os conhecimentos adquiridos em desenvolvimento de software, construção de APIs REST, autenticação, controle de acesso, banco de dados e testes de software.
+
+A proposta também serviu como oportunidade de aprofundar conhecimentos em Python e FastAPI, simulando um cenário corporativo de gestão de reembolsos.
+
+**Projeto com finalidade educacional e de aprendizado.**
+
 ## Tecnologias utilizadas
 
 - Python
@@ -192,12 +200,6 @@ nexuscorp_reembolsos/
 - Não realiza integração bancária ou pagamentos reais.
 - O histórico é protegido contra alterações pelas rotas HTTP, mas não contra alterações diretas no banco de dados.
 - A troca de senha não possui endpoint implementado nesta versão.
-
-## Objetivo do projeto
-
-Este projeto foi desenvolvido como aplicação prática de desenvolvimento de APIs REST, autenticação, autorização, persistência de dados, regras de negócio e testes de software.
-
-A solução demonstra a implementação de um fluxo corporativo de reembolsos com diferentes níveis de responsabilidade e mecanismos de controle de acesso.
 
 ---
 
